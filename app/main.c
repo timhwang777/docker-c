@@ -58,8 +58,10 @@ int create_and_change_docker_directory(char* curr_dir) {
 		return EXIT_FAILURE;
 	}
 
+	char* new_dir = malloc(strlen(tmp_dir) + 2);
+	getcwd(new_dir, strlen(tmp_dir) + 2);
 	// Change the current root to the temporary directory using pivot_root
-	if (chroot(".") != 0) {
+	if (chroot(new_dir) != 0) {
 		perror("Error changing root");
 		return EXIT_FAILURE;
 	}
