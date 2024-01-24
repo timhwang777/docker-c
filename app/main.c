@@ -3,8 +3,67 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #define BUFFER_SIZE 4096
+
+int copy_files(char* src, char* dest) {
+	FILE* src_files = fopen(src, "rb");
+	FILE* dest_files = fopen(dest, "wb");
+
+	if (src_files == NULL || dest_files == NULL) {
+		printf("Error opening files!\n");
+		return EXIT_FAILURE;
+	}
+
+	// Read the source file and write to the destination file
+	char buffer[BUFFER_SIZE];
+	size_t bytes_read;
+	while ((bytes_read = fread(buffer, 1, sizeof(buffer), src_files)) > 0) {
+		fwrite(buffer, 1, bytes_read, dest_files);
+	}
+
+	fclose(src_files);
+	fclose(dest_files);
+	chmod(dest, S_IRWXU); // Set the permission of the file
+
+	return EXIT_SUCCESS;
+}
+
+int create_and_change_docker_directory(char* curr_dir) {
+	// Create a temporary directory
+	char dir_name[] = "/tmp/mydockerXXXXXX";
+	char* tmp_dir = mkdtemp(dir_name);
+	if (tmp_dir == errno) {
+		printf("Error creating temporary directory!\n");
+		return EXIT_FAILURE;
+	}
+
+	// Get the destination path
+	char* file_name = basename(curr_dir);
+	char* dest_path = malloc(strlen(tmp_dir) + strlen(file_name) + 2);
+	sprintf(dest_path, "%s/%s", tmp_dir, file_name);
+
+	// Copy the files to the temporary directory
+	if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
+		printf("Error copying files!\n");
+		return EXIT_FAILURE;
+	}
+
+	// Change the current directory to the temporary directory
+	if (chdir(tmp_dir) == errno) {
+		printf("Error changing directory!\n");
+		return EXIT_FAILURE;
+	}
+
+	// Change the current root to the temporary directory using pivot_root
+	if (pivot_root(".", ".") == errno) {
+		printf("Error changing root!\n");
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
 
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
@@ -30,6 +89,12 @@ int main(int argc, char *argv[]) {
 		// Close the read end of the pipes
 		close(out_pipe[0]);
 		close(err_pipe[0]);
+
+		// Create and change the docker directory
+		if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
+			printf("Error creating and changing docker directory!\n");
+			return EXIT_FAILURE;
+		}
 
 		// Execute the command
 	    execv(command, &argv[3]);
@@ -62,5 +127,5 @@ int main(int argc, char *argv[]) {
 		exit(exit_status);
 	}	
 
-	return 0;
+	return EXIT_SUCCESS;
 }
