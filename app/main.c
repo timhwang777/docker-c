@@ -71,14 +71,20 @@ int create_and_change_docker_directory(char* curr_dir) {
 
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
+	char *command = argv[3];
 	
+	// Create and change the docker directory
+	if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
+		printf("Error creating and changing docker directory!\n");
+		return EXIT_FAILURE;
+	}
+
 	// Set the output and error pipes
 	int out_pipe[2];
 	int err_pipe[2];
 	pipe(out_pipe);
 	pipe(err_pipe);
 
-	char *command = argv[3];
 	int child_pid = fork();
 	if (child_pid == -1) {
 	    printf("Error forking!");
@@ -93,12 +99,6 @@ int main(int argc, char *argv[]) {
 		// Close the read end of the pipes
 		close(out_pipe[0]);
 		close(err_pipe[0]);
-
-		// Create and change the docker directory
-		if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
-			printf("Error creating and changing docker directory!\n");
-			return EXIT_FAILURE;
-		}
 
 		// Execute the command
 	    execv(command, &argv[3]);
