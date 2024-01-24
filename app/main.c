@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define BUFFER_SIZE 4096
 
@@ -40,8 +41,17 @@ int main(int argc, char *argv[]) {
 		// Read the output and error
 		char out[BUFFER_SIZE];
 		char err[BUFFER_SIZE];
-		read(out_pipe[0], out, sizeof(out));
-		read(err_pipe[0], err, sizeof(err));
+		int out_bytes_read = read(out_pipe[0], out, sizeof(out));
+		int err_bytes_read = read(err_pipe[0], err, sizeof(err));
+		// Write the output and error
+		if (out_bytes_read != errno) {
+			out[out_bytes_read] = '\0';
+			write(STDOUT_FILENO, out, out_bytes_read);
+		}
+		if (err_bytes_read != errno) {
+			err[err_bytes_read] = '\0';
+			write(STDERR_FILENO, err, err_bytes_read);
+		}
 
 		waitpid(child_pid, NULL, 0);
 	}
