@@ -2,7 +2,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define BUFFER_SIZE 4096;
+#define BUFFER_SIZE 4096
 
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
