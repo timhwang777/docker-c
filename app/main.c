@@ -2,6 +2,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #define BUFFER_SIZE 4096
 
@@ -53,8 +54,13 @@ int main(int argc, char *argv[]) {
 			write(STDERR_FILENO, err, err_bytes_read);
 		}
 
-		waitpid(child_pid, NULL, 0);
-	}
+		// Examines the exit status of the child process
+		int status, exit_status;
+		waitpid(child_pid, &status, 0);
+		exit_status = WEXITSTATUS(status);
+
+		exit(exit_status);
+	}	
 
 	return 0;
 }
