@@ -59,8 +59,8 @@ int create_and_change_docker_directory(char* curr_dir) {
 	}
 
 	// Change the current root to the temporary directory using pivot_root
-	if (pivot_root(".", ".") == errno) {
-		printf("Error changing root!\n");
+	if (chroot(".") != 0) {
+		perror("Error changing root");
 		return EXIT_FAILURE;
 	}
 
