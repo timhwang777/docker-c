@@ -53,7 +53,7 @@ int create_and_change_docker_directory(char* curr_dir) {
 	}
 
 	// Change the current directory to the temporary directory
-	if (chdir(tmp_dir) == errno) {
+	if (chdir(tmp_dir) == -1) {
 		printf("Error changing directory!\n");
 		return EXIT_FAILURE;
 	}
