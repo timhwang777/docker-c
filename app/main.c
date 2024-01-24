@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <libgen.h>
+#include <string.h>
 
 #define BUFFER_SIZE 4096
 
@@ -34,7 +36,7 @@ int create_and_change_docker_directory(char* curr_dir) {
 	// Create a temporary directory
 	char dir_name[] = "/tmp/mydockerXXXXXX";
 	char* tmp_dir = mkdtemp(dir_name);
-	if (tmp_dir == errno) {
+	if (tmp_dir == NULL) {
 		printf("Error creating temporary directory!\n");
 		return EXIT_FAILURE;
 	}
