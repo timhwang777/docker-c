@@ -72,12 +72,6 @@ int create_and_change_docker_directory(char* curr_dir) {
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
 	char *command = argv[3];
-	
-	// Create and change the docker directory
-	if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
-		printf("Error creating and changing docker directory!\n");
-		return EXIT_FAILURE;
-	}
 
 	// Set the output and error pipes
 	int out_pipe[2];
