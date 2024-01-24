@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 		close(err_pipe[0]);
 
 		// Execute the command
-	    execv(command, &argv[3]);
+	    execv(basename(command), &argv[3]);
 	} 
 	else { // Parent process
 		// Close the write end of the pipes
