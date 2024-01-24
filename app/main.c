@@ -14,7 +14,7 @@ int copy_files(char* src, char* dest) {
 	FILE* dest_files = fopen(dest, "wb");
 
 	if (src_files == NULL || dest_files == NULL) {
-		printf("Error opening files!\n");
+		perror("Error opening files!\n");
 		return EXIT_FAILURE;
 	}
 
@@ -37,7 +37,7 @@ int create_and_change_docker_directory(char* curr_dir) {
 	char dir_name[] = "/tmp/mydockerXXXXXX";
 	char* tmp_dir = mkdtemp(dir_name);
 	if (tmp_dir == NULL) {
-		printf("Error creating temporary directory!\n");
+		perror("Error creating temporary directory!\n");
 		return EXIT_FAILURE;
 	}
 
@@ -48,13 +48,13 @@ int create_and_change_docker_directory(char* curr_dir) {
 
 	// Copy the files to the temporary directory
 	if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
-		printf("Error copying files!\n");
+		perror("Error copying files!\n");
 		return EXIT_FAILURE;
 	}
 
 	// Change the current directory to the temporary directory
 	if (chdir(tmp_dir) == -1) {
-		printf("Error changing directory!\n");
+		perror("Error changing directory!\n");
 		return EXIT_FAILURE;
 	}
 
@@ -81,11 +81,17 @@ int main(int argc, char *argv[]) {
 
 	int child_pid = fork();
 	if (child_pid == -1) {
-	    printf("Error forking!");
+	    perror("Error forking!");
 	    return 1;
 	}
 	
 	if (child_pid == 0) { // Child process
+		// Create and change the docker directory
+		if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
+			perror("Error creating and changing docker directory!\n");
+			return EXIT_FAILURE;
+		}
+
 		// Redirect the stdout and stderr
 		dup2(out_pipe[1], STDOUT_FILENO);
 		dup2(err_pipe[1], STDERR_FILENO);
