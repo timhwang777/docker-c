@@ -101,7 +101,7 @@ int child_function(void* arg) {
 	close(args->err_pipe[0]);
 
 	// Execute the command
-	if (execv(basename(args->command), args->argv) == -1) {
+	if (execv(args->command, args->argv) == -1) {
 		perror("execv failed");
 		return EXIT_FAILURE;
 	}
