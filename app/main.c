@@ -161,6 +161,5 @@ int main(int argc, char *argv[]) {
 		exit(exit_status);
 	}	
 
-	free(child_stack);
 	return EXIT_SUCCESS;
 }
