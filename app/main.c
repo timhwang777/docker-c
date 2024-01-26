@@ -100,11 +100,11 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	printf("Executing %s\n",  (char*)args->command);
+	/*printf("Executing %s\n",  (char*)args->command);
 	printf("Command %s\n", (char*)args->argv[0]);
 	printf("Command %s\n", (char*)args->argv[1]);
 	printf("Command %s\n", (char*)args->argv[2]);
-	printf("Command %s\n", (char*)args->argv[3]);
+	printf("Command %s\n", (char*)args->argv[3]);*/
 
 	// Execute the command
 	if (execv(args->command, args->argv[2]) == -1) {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 	char** new_args = calloc(len, sizeof(char*));
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
-	printf("Command in Main %s\n", command);
+	// printf("Command in Main %s\n", command);
 
 	struct child_args args = {out_pipe, err_pipe, .command = command, new_args};
 
