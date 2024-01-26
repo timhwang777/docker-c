@@ -100,10 +100,6 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	// Close the duplicated file descriptors
-    close(args->out_pipe[1]);
-    close(args->err_pipe[1]);
-
 	// Execute the command
 	if (execv(basename(args->command), args->argv[3]) == -1) {
 		perror("execv failed");
