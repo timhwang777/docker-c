@@ -130,11 +130,7 @@ int main(int argc, char *argv[]) {
 	    return 1;
 	}
 	
-	if (child_pid == 0) { // Child process
 
-	} 
-	else { // Parent process
-		// Close the write end of the pipes
 		close(out_pipe[1]);
 		close(err_pipe[1]);
 
@@ -159,7 +155,6 @@ int main(int argc, char *argv[]) {
 		exit_status = WEXITSTATUS(status);
 
 		exit(exit_status);
-	}	
 
 	return EXIT_SUCCESS;
 }
