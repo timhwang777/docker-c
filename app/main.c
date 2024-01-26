@@ -97,10 +97,10 @@ int child_function(void* arg) {
     close(args->err_pipe[1]);
 
 	// Execute the command
-	execv(basename(args->command), &(args->argv[3]));
-
-	perror("execv failed");
-    return EXIT_FAILURE;
+	if (execv(basename(args->command), args->argv[3]) == -1) {
+		perror("execv failed");
+		return EXIT_FAILURE;
+	}
 }
 
 int main(int argc, char *argv[]) {
