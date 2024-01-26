@@ -101,6 +101,8 @@ int child_function(void* arg) {
 	close(args->err_pipe[0]);
 
 	printf("Executing %s\n",  (char*)args->command);
+	printf("Command %s\n", (char**)args->argv);
+
 	// Execute the command
 	if (execv(args->command, args->argv) == -1) {
 		perror("execv failed");
@@ -124,7 +126,7 @@ int main(int argc, char *argv[]) {
 	char** new_args = calloc(len, sizeof(char*));
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
-	printf("Command in Main %s", command);
+	printf("Command in Main %s\n", command);
 
 	struct child_args args = {out_pipe, err_pipe, .command = command, new_args};
 
