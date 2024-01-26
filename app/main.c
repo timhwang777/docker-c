@@ -101,7 +101,7 @@ int child_function(void* arg) {
 	close(args->err_pipe[0]);
 
 	printf("Executing %s\n",  (char*)args->command);
-	printf("Command %s\n", (char**)args->argv);
+	printf("Command %s\n", (char*)args->argv[0]);
 
 	// Execute the command
 	if (execv(args->command, args->argv) == -1) {
