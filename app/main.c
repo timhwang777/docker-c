@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <libgen.h>
 #include <string.h>
+#include <limits.h> 
 
 #define BUFFER_SIZE 4096
 char child_stack[1024*1024];
@@ -83,12 +84,6 @@ int create_and_change_docker_directory(char* curr_dir) {
 int child_function(void* arg) {
 	struct child_args* args = (struct child_args*) arg;
 
-	// Create and change the docker directory
-	if (create_and_change_docker_directory(args->command) == EXIT_FAILURE) {
-		perror("Error creating and changing docker directory!\n");
-		return EXIT_FAILURE;
-	}
-
 	// Redirect the stdout and stderr
 	dup2(args->out_pipe[1], STDOUT_FILENO);
 	dup2(args->err_pipe[1], STDERR_FILENO);
@@ -111,6 +106,14 @@ int child_function(void* arg) {
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
 	char *command = argv[3];
+
+	// Create and change the docker directory
+	char curr_dir[PATH_MAX];
+	getcwd(curr_dir, sizeof(curr_dir));
+	if (create_and_change_docker_directory(curr_dir) == EXIT_FAILURE) {
+		perror("Error creating and changing docker directory!\n");
+		return EXIT_FAILURE;
+	}
 
 	// Set the output and error pipes
 	int out_pipe[2];
