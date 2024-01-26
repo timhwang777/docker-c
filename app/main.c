@@ -107,7 +107,7 @@ int child_function(void* arg) {
 	printf("Command %s\n", (char*)args->argv[3]);*/
 
 	// Execute the command
-	if (execv(args->command, args->argv[2]) == -1) {
+	if (execv(basename(args->command), args->argv[2]) == -1) {
 		perror("execv failed");
 		return EXIT_FAILURE;
 	}
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 
 	// printf("Command in Main %s\n", command);
 
-	struct child_args args = {.out_pipe = out_pipe, .err_pipe = err_pipe, .command = command, .new_args = argv};
+	struct child_args args = {out_pipe, err_pipe, command, new_args};
 
 	// int child_pid = fork();
 	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
