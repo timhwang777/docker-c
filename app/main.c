@@ -117,7 +117,13 @@ int main(int argc, char *argv[]) {
 	pipe(out_pipe);
 	pipe(err_pipe);
 
-	struct child_args args = {out_pipe, err_pipe, command, argv};
+
+	// Revise the argv for the child process
+	int len = argc - 3 + 2;
+	char** new_args = calloc(len, sizeof(char*));
+	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
+
+	struct child_args args = {out_pipe, err_pipe, command, new_args};
 
 	// int child_pid = fork();
 	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
