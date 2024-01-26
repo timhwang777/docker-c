@@ -125,6 +125,8 @@ int main(int argc, char *argv[]) {
 	char** new_args = calloc(len, sizeof(char*));
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
+	printf("Command in Main %s", command);
+
 	struct child_args args = {out_pipe, err_pipe, command, new_args};
 
 	// int child_pid = fork();
