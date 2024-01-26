@@ -1,3 +1,6 @@
+#define _GNU_SOURCE
+#include <sched.h>  // for clone
+#include <signal.h> // for SIGCHLD
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -8,6 +11,14 @@
 #include <string.h>
 
 #define BUFFER_SIZE 4096
+char child_stack[1024*1024];
+
+struct child_args {
+	int out_pipe[2];
+	int err_pipe[2];
+	char* command;
+	char** argv;
+};
 
 int copy_files(char* src, char* dest) {
 	FILE* src_files = fopen(src, "rb");
@@ -58,15 +69,43 @@ int create_and_change_docker_directory(char* curr_dir) {
 		return EXIT_FAILURE;
 	}
 
+	// Change the current root to the temporary directory using chroot
 	char* new_dir = malloc(strlen(tmp_dir) + 2);
 	getcwd(new_dir, strlen(tmp_dir) + 2);
-	// Change the current root to the temporary directory using pivot_root
 	if (chroot(new_dir) != 0) {
 		perror("Error changing root");
 		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
+}
+
+int child_function(void* arg) {
+	struct child_args* args = (struct child_args*) arg;
+
+	// Create and change the docker directory
+	if (create_and_change_docker_directory(args->command) == EXIT_FAILURE) {
+		perror("Error creating and changing docker directory!\n");
+		return EXIT_FAILURE;
+	}
+
+	// Redirect the stdout and stderr
+	dup2(args->out_pipe[1], STDOUT_FILENO);
+	dup2(args->err_pipe[1], STDERR_FILENO);
+
+	// Close the read end of the pipes
+	close(args->out_pipe[0]);
+	close(args->err_pipe[0]);
+
+	// Close the duplicated file descriptors
+    close(args->out_pipe[1]);
+    close(args->err_pipe[1]);
+
+	// Execute the command
+	execv(basename(args->command), &(args->argv[3]));
+
+	perror("execv failed");
+    return EXIT_FAILURE;
 }
 
 int main(int argc, char *argv[]) {
@@ -79,29 +118,17 @@ int main(int argc, char *argv[]) {
 	pipe(out_pipe);
 	pipe(err_pipe);
 
-	int child_pid = fork();
+	struct child_args args = {out_pipe, err_pipe, command, argv};
+
+	// int child_pid = fork();
+	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
 	if (child_pid == -1) {
 	    perror("Error forking!");
 	    return 1;
 	}
 	
 	if (child_pid == 0) { // Child process
-		// Create and change the docker directory
-		if (create_and_change_docker_directory(command) == EXIT_FAILURE) {
-			perror("Error creating and changing docker directory!\n");
-			return EXIT_FAILURE;
-		}
 
-		// Redirect the stdout and stderr
-		dup2(out_pipe[1], STDOUT_FILENO);
-		dup2(err_pipe[1], STDERR_FILENO);
-
-		// Close the read end of the pipes
-		close(out_pipe[0]);
-		close(err_pipe[0]);
-
-		// Execute the command
-	    execv(basename(command), &argv[3]);
 	} 
 	else { // Parent process
 		// Close the write end of the pipes
@@ -131,5 +158,6 @@ int main(int argc, char *argv[]) {
 		exit(exit_status);
 	}	
 
+	free(child_stack);
 	return EXIT_SUCCESS;
 }
