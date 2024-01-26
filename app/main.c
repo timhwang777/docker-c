@@ -85,11 +85,7 @@ int child_function(void* arg) {
 	struct child_args* args = (struct child_args*) arg;
 
 	// Create and change the docker directory
-	char curr_dir[PATH_MAX];
-	getcwd(curr_dir, sizeof(curr_dir));
-	printf("Current directory: %s\n", curr_dir);
-	
-	if (create_and_change_docker_directory(curr_dir) == EXIT_FAILURE) {
+	if (create_and_change_docker_directory(args->command) == EXIT_FAILURE) {
 		perror("Error creating and changing docker directory!\n");
 		return EXIT_FAILURE;
 	}
