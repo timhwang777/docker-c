@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 
 	// printf("Command in Main %s\n", command);
 
-	struct child_args args = {out_pipe, err_pipe, .command = command, new_args};
+	struct child_args args = {.out_pipe = out_pipe, .err_pipe = err_pipe, .command = command, .new_args = new_args};
 
 	// int child_pid = fork();
 	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
