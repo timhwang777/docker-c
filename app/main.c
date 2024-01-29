@@ -105,6 +105,8 @@ int child_function(void* arg) {
 		i++;
 	}*/
 
+	args->argv[0] = basename(args->command);
+
 	// Execute the command
 	if (execv(basename(args->command), args->argv) == -1) {
 		perror("execv failed");
