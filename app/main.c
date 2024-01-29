@@ -99,13 +99,14 @@ int child_function(void* arg) {
 	close(args->err_pipe[0]);
 
 	/*printf("Executing %s\n",  (char*)args->command);
-	printf("Command %s\n", (char*)args->argv[0]);
-	printf("Command %s\n", (char*)args->argv[1]);
-	printf("Command %s\n", (char*)args->argv[2]);
-	printf("Command %s\n", (char*)args->argv[3]);*/
+	int i = 0;
+	while(args->argv[i] != NULL) {
+		printf("Command %s\n", (char*)args->argv[i]);
+		i++;
+	}*/
 
 	// Execute the command
-	if (execv(basename(args->command), args->argv[2]) == -1) {
+	if (execv(basename(args->command), args->argv) == -1) {
 		perror("execv failed");
 		return EXIT_FAILURE;
 	}
@@ -127,9 +128,13 @@ int main(int argc, char *argv[]) {
 	char** new_args = calloc(len, sizeof(char*));
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
-	// printf("Command in Main %s\n", command);
-
-	struct child_args args = {out_pipe, err_pipe, command, new_args};
+	struct child_args args;
+	args.out_pipe[0] = out_pipe[0];
+	args.out_pipe[1] = out_pipe[1];
+	args.err_pipe[0] = err_pipe[0];
+	args.err_pipe[1] = err_pipe[1];
+	args.command = command;
+	args.argv = new_args;
 
 	// int child_pid = fork();
 	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
@@ -139,28 +144,27 @@ int main(int argc, char *argv[]) {
 	}
 	
 
+		// Examines the exit status of the child process
+		int status, exit_status;
+		waitpid(child_pid, &status, 0);
+		exit_status = WEXITSTATUS(status);
+		
 		close(out_pipe[1]);
 		close(err_pipe[1]);
-
 		// Read the output and error
 		char out[BUFFER_SIZE];
 		char err[BUFFER_SIZE];
 		int out_bytes_read = read(out_pipe[0], out, sizeof(out));
 		int err_bytes_read = read(err_pipe[0], err, sizeof(err));
 		// Write the output and error
-		if (out_bytes_read != errno) {
+		if (out_bytes_read != -1) {
 			out[out_bytes_read] = '\0';
 			write(STDOUT_FILENO, out, out_bytes_read);
 		}
-		if (err_bytes_read != errno) {
+		if (err_bytes_read != -1) {
 			err[err_bytes_read] = '\0';
 			write(STDERR_FILENO, err, err_bytes_read);
 		}
-
-		// Examines the exit status of the child process
-		int status, exit_status;
-		waitpid(child_pid, &status, 0);
-		exit_status = WEXITSTATUS(status);
 
 		exit(exit_status);
 
