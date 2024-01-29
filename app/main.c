@@ -105,8 +105,10 @@ int child_function(void* arg) {
 		i++;
 	}*/
 
+	// Set the argv[0] to the tmp_dir
 	args->argv[0] = basename(args->command);
 
+	//printf("Child process PID: %d\n", getpid());
 	// Execute the command
 	if (execv(basename(args->command), args->argv) == -1) {
 		perror("execv failed");
@@ -139,36 +141,36 @@ int main(int argc, char *argv[]) {
 	args.argv = new_args;
 
 	// int child_pid = fork();
-	int child_pid = clone(child_function, child_stack + (1024*1024), SIGCHLD, &args);
+	int child_pid = clone(child_function, child_stack + (1024*1024), CLONE_NEWUTS | CLONE_NEWPID | SIGCHLD, &args);
 	if (child_pid == -1) {
 	    perror("Error forking!");
 	    return 1;
 	}
 	
 
-		// Examines the exit status of the child process
-		int status, exit_status;
-		waitpid(child_pid, &status, 0);
-		exit_status = WEXITSTATUS(status);
-		
-		close(out_pipe[1]);
-		close(err_pipe[1]);
-		// Read the output and error
-		char out[BUFFER_SIZE];
-		char err[BUFFER_SIZE];
-		int out_bytes_read = read(out_pipe[0], out, sizeof(out));
-		int err_bytes_read = read(err_pipe[0], err, sizeof(err));
-		// Write the output and error
-		if (out_bytes_read != -1) {
-			out[out_bytes_read] = '\0';
-			write(STDOUT_FILENO, out, out_bytes_read);
-		}
-		if (err_bytes_read != -1) {
-			err[err_bytes_read] = '\0';
-			write(STDERR_FILENO, err, err_bytes_read);
-		}
+	// Examines the exit status of the child process
+	int status, exit_status;
+	waitpid(child_pid, &status, 0);
+	exit_status = WEXITSTATUS(status);
+	
+	close(out_pipe[1]);
+	close(err_pipe[1]);
+	// Read the output and error
+	char out[BUFFER_SIZE];
+	char err[BUFFER_SIZE];
+	int out_bytes_read = read(out_pipe[0], out, sizeof(out));
+	int err_bytes_read = read(err_pipe[0], err, sizeof(err));
+	// Write the output and error
+	if (out_bytes_read != -1) {
+		out[out_bytes_read] = '\0';
+		write(STDOUT_FILENO, out, out_bytes_read);
+	}
+	if (err_bytes_read != -1) {
+		err[err_bytes_read] = '\0';
+		write(STDERR_FILENO, err, err_bytes_read);
+	}
 
-		exit(exit_status);
+	exit(exit_status);
 
 	return EXIT_SUCCESS;
 }
