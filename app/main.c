@@ -12,6 +12,7 @@
 #include <limits.h> 
 
 #include "init_docker_image.h"
+#include "util.h"
 
 #define BUFFER_SIZE 4096
 char child_stack[1024*1024];
@@ -56,16 +57,17 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 		return EXIT_FAILURE;
 	}
 
-	// Get the destination path
-	char* file_name = basename(curr_dir);
-	char* dest_path = malloc(strlen(tmp_dir) + strlen(file_name) + 2);
-	sprintf(dest_path, "%s/%s", tmp_dir, file_name);
-
 	// Initialize the docker image
 	if (init_docker_image(image, tmp_dir) == -1) {
 		perror("Error initializing docker image!\n");
 		return EXIT_FAILURE;
 	}
+
+	// Get the destination path
+	char* file_name = basename(curr_dir);
+	char* dest_path = malloc(strlen(tmp_dir) + strlen(file_name) + 2);
+	sprintf(dest_path, "%s/%s", tmp_dir, file_name);
+	make_dir(dest_path);
 
 	// Copy the files to the temporary directory
 	if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
