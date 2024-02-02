@@ -11,6 +11,8 @@
 #include <string.h>
 #include <limits.h> 
 
+#include "init_docker_image.h"
+
 #define BUFFER_SIZE 4096
 char child_stack[1024*1024];
 
@@ -19,6 +21,7 @@ struct child_args {
 	int err_pipe[2];
 	char* command;
 	char** argv;
+	char docker_image[PATH_MAX];
 };
 
 int copy_files(char* src, char* dest) {
@@ -44,7 +47,7 @@ int copy_files(char* src, char* dest) {
 	return EXIT_SUCCESS;
 }
 
-int create_and_change_docker_directory(char* curr_dir) {
+int create_and_change_docker_directory(char* curr_dir, char* image) {
 	// Create a temporary directory
 	char dir_name[] = "/tmp/mydockerXXXXXX";
 	char* tmp_dir = mkdtemp(dir_name);
@@ -57,6 +60,12 @@ int create_and_change_docker_directory(char* curr_dir) {
 	char* file_name = basename(curr_dir);
 	char* dest_path = malloc(strlen(tmp_dir) + strlen(file_name) + 2);
 	sprintf(dest_path, "%s/%s", tmp_dir, file_name);
+
+	// Initialize the docker image
+	if (init_docker_image(image, tmp_dir) == -1) {
+		perror("Error initializing docker image!\n");
+		return EXIT_FAILURE;
+	}
 
 	// Copy the files to the temporary directory
 	if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
@@ -85,7 +94,7 @@ int child_function(void* arg) {
 	struct child_args* args = (struct child_args*) arg;
 
 	// Create and change the docker directory
-	if (create_and_change_docker_directory(args->command) == EXIT_FAILURE) {
+	if (create_and_change_docker_directory(args->command, args->docker_image) == EXIT_FAILURE) {
 		perror("Error creating and changing docker directory!\n");
 		return EXIT_FAILURE;
 	}
@@ -118,7 +127,9 @@ int child_function(void* arg) {
 
 int main(int argc, char *argv[]) {
 	setbuf(stdout, NULL);
+	char docker_image[PATH_MAX];
 	char *command = argv[3];
+	strcpy(docker_image, argv[2]);
 
 	// Set the output and error pipes
 	int out_pipe[2];
@@ -139,6 +150,7 @@ int main(int argc, char *argv[]) {
 	args.err_pipe[1] = err_pipe[1];
 	args.command = command;
 	args.argv = new_args;
+	strcpy(args.docker_image, docker_image);
 
 	// int child_pid = fork();
 	int child_pid = clone(child_function, child_stack + (1024*1024), CLONE_NEWUTS | CLONE_NEWPID | SIGCHLD, &args);
