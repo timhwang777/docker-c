@@ -18,8 +18,8 @@
 char child_stack[1024*1024];
 
 struct child_args {
-	int out_pipe[2];
-	int err_pipe[2];
+	int* out_pipe;
+	int* err_pipe;
 	char* command;
 	char** argv;
 	char docker_image[PATH_MAX];
@@ -73,7 +73,9 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 	char* file_name = basename(curr_dir);
 	char* dest_path = malloc(strlen(tmp_dir) + strlen(file_name) + 2);
 	sprintf(dest_path, "%s/%s", tmp_dir, file_name);
-	make_dir(dest_path);
+	// The make_dir has some tricky behavior, 
+	// it will create /sh directory if the command has /sh
+	//make_dir(dest_path);
 
 	// Copy the files to the temporary directory
 	// We don't need to copy the files, because we download the docker image
@@ -116,12 +118,12 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	/*printf("Executing %s\n",  (char*)args->command);
+	printf("Executing %s\n",  (char*)args->command);
 	int i = 0;
 	while(args->argv[i] != NULL) {
 		printf("Command %s\n", (char*)args->argv[i]);
 		i++;
-	}*/
+	}
 
 	// Set the argv[0] to the tmp_dir, don't need at final stage
 	// args->argv[0] = basename(args->command);
@@ -162,29 +164,26 @@ int main(int argc, char *argv[]) {
 	}*/
 
 	struct child_args args;
-	args.out_pipe[0] = out_pipe[0];
-	args.out_pipe[1] = out_pipe[1];
-	args.err_pipe[0] = err_pipe[0];
-	args.err_pipe[1] = err_pipe[1];
+	args.out_pipe = out_pipe;
+	args.err_pipe = err_pipe;
 	args.command = command;
 	args.argv = new_args;
 	strcpy(args.docker_image, docker_image);
 
 	// int child_pid = fork();
-	int child_pid = clone(child_function, child_stack + (1024*1024), CLONE_NEWUTS | CLONE_NEWPID | SIGCHLD, &args);
+	int child_pid = clone(child_function, child_stack + (1024*1024), CLONE_NEWPID | SIGCHLD, (void*) &args);
 	if (child_pid == -1) {
 	    perror("Error forking!");
 	    return 1;
 	}
 	
-
 	// Examines the exit status of the child process
 	int status, exit_status;
 	waitpid(child_pid, &status, 0);
 	exit_status = WEXITSTATUS(status);
-	
 	close(out_pipe[1]);
 	close(err_pipe[1]);
+
 	// Read the output and error
 	char out[BUFFER_SIZE];
 	char err[BUFFER_SIZE];
@@ -193,13 +192,6 @@ int main(int argc, char *argv[]) {
 	// Write the output and error
 	if (out_bytes_read != -1) {
 		out[out_bytes_read] = '\0';
-		/*
-			Note: Remove the "sh" from the output, I don't know why it appears in my output.
-		*/
-		char *pos;
-   		while ((pos = strstr(out, "\nsh")) != NULL) {
-        	memmove(pos, pos + 3, strlen(pos + 3) + 1);
-    	}
 		write(STDOUT_FILENO, out, out_bytes_read);
 	}
 	if (err_bytes_read != -1) {
