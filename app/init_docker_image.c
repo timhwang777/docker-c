@@ -21,7 +21,7 @@ int init_docker_image(char* image, char* dir) {
 
         image = temp; 
     } else {
-        tag = malloc(strlen("latest") + 1);
+        tag = malloc(strlen("latest"));
         strcpy(tag, "latest");
     }
 
