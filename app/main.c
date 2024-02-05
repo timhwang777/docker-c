@@ -197,8 +197,8 @@ int main(int argc, char *argv[]) {
 			Note: Remove the "sh" from the output, I don't know why it appears in my output.
 		*/
 		char *pos;
-   		while ((pos = strstr(out, "sh\n")) != NULL) {
-        	memmove(pos, pos + 3, strlen(pos + 3) + 3);
+   		while ((pos = strstr(out, "\nsh")) != NULL) {
+        	memmove(pos, pos + 3, strlen(pos + 3) + 1);
     	}
 		write(STDOUT_FILENO, out, out_bytes_read);
 	}
