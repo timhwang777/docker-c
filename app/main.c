@@ -118,12 +118,12 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	printf("Executing %s\n",  (char*)args->command);
+	/*printf("Executing %s\n",  (char*)args->command);
 	int i = 0;
 	while(args->argv[i] != NULL) {
 		printf("Command %s\n", (char*)args->argv[i]);
 		i++;
-	}
+	}*/
 
 	// Set the argv[0] to the tmp_dir, don't need at final stage
 	// args->argv[0] = basename(args->command);
