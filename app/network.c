@@ -13,7 +13,7 @@ struct response_content {
 };
 
 char* get_response(char* uri, char* bearer_token) {
-    printf("Getting response from: %s with token: %s\n", uri, bearer_token);
+    //printf("Getting response from: %s with token: %s\n", uri, bearer_token);
     CURL* curl;
     char* content = NULL;
     char full_uri[200];
@@ -66,6 +66,7 @@ char* get_response(char* uri, char* bearer_token) {
 }
 
 int download_file(char* uri, char* file, char* bearer_token) {
+    printf("Download the docker image\n");
     int result = -1;
     FILE* file_ptr;
     CURL* curl = curl_easy_init();

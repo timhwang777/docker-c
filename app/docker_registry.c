@@ -48,6 +48,7 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
     strcat(full_uri, "manifests");
     strcat(full_uri, "/");
     strcat(full_uri, tag);
+    //printf("Full URI: %s\n", full_uri);
 
     char* bearer_token = NULL;
     if (token != NULL) {
@@ -56,10 +57,14 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
         strcpy(bearer_token, "Authorization: Bearer ");
         strcat(bearer_token, token);
     }
+    //printf("Bearer token: %s\n", bearer_token);
 
     char* content;
+    int idx = 0;
     if ((content = get_response(full_uri, bearer_token)) != NULL) {
+        //printf("Content: %s\n", content);
         layer_ids = parse_layers(content);
+        printf("Layer ids: %s\n", layer_ids[idx++]);
         free(content);
     }
 
@@ -71,6 +76,7 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
 }
 
 int docker_get_layer(char* token, char* dir, char* repo, char* image, char* id) {
+    printf("Getting layer: %s\n", id);
     size_t len = strlen(DOCKER_REGISTRY_IMAGES_URI) + strlen(repo) + strlen(image) + strlen("blobs") + 
                  strlen(id) + strlen("////");
 
@@ -130,10 +136,12 @@ char** add_string_to_array(char** array, int* size, char* string) {
 }
 
 char** parse_layers(char* response_content) {
+    //printf("Parsing layers, response_content: %s\n", response_content);
     if (response_content == NULL) {
         return NULL;
     }
 
+    /* Bugs */
     char** list = NULL;
     int list_size = 0;
     while (1) {
@@ -153,11 +161,13 @@ char** parse_layers(char* response_content) {
         char* id = malloc(size + 1);
         memset(id, 0, size + 1);
         strncpy(id, pstart + 11, size - 12);
-        list = add_string_to_array(list, &list_size, "end");
-        list[list_size - 1] = NULL;
-
-        return list;
+        list = add_string_to_array(list, &list_size, id);
+        response_content = pend;
     }
+
+    list = add_string_to_array(list, &list_size, "end");
+    list[list_size - 1] = NULL;
+    return list;
 }
 
 char* parse_token(char* response_content) {

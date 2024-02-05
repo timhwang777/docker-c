@@ -25,6 +25,9 @@ struct child_args {
 	char docker_image[PATH_MAX];
 };
 
+/*
+	Copy files from the src to the tmp_dir, don't need at final stage
+*/
 int copy_files(char* src, char* dest) {
 	FILE* src_files = fopen(src, "rb");
 	FILE* dest_files = fopen(dest, "wb");
@@ -73,6 +76,7 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 	make_dir(dest_path);
 
 	// Copy the files to the temporary directory
+	// We don't need to copy the files, because we download the docker image
 	/*if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
 		perror("Error copying files!\n");
 		return EXIT_FAILURE;
@@ -112,19 +116,20 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	/*printf("Executing %s\n",  (char*)args->command);
+	printf("Executing %s\n",  (char*)args->command);
 	int i = 0;
 	while(args->argv[i] != NULL) {
 		printf("Command %s\n", (char*)args->argv[i]);
 		i++;
-	}*/
+	}
 
-	// Set the argv[0] to the tmp_dir
-	args->argv[0] = basename(args->command);
+	// Set the argv[0] to the tmp_dir, don't need at final stage
+	// args->argv[0] = basename(args->command);
 
-	//printf("Child process PID: %d\n", getpid());
 	// Execute the command
-	if (execv(basename(args->command), args->argv) == -1) {
+	// execv(basename(args->command), args->argv);
+	// Because we download the docker image, we don't need to use the basename
+	if (execv(args->command, args->argv) == -1) {
 		perror("execv failed");
 		return EXIT_FAILURE;
 	}
