@@ -10,7 +10,7 @@
 3. [Author](#author)
 
 ## About the Project
-This project is about building a simple Docker in C. I have built some underlying Docker tools like getting the token from the Docker Registry, enumerating the Docker file system layers, and authorizing with tokens to download files from the Docker Registry. Moreover, I also developed a `child process` with an independent `PID`, e.g., `PID = 1` with `_GNU_SOURCE` and C's built-in library.\
+This project is about building a simple Docker in C. I have built some underlying Docker tools like getting the token from the Docker Registry, enumerating the Docker file system layers, and authorizing with tokens to download files from the Docker Registry. Moreover, I also developed a `child process` with an independent `PID`, e.g., `PID = 1` with `_GNU_SOURCE` and C's built-in library.
 
 Please note that this project is only used for understanding the framework of Docker, Docker Registry, Internet theory, and Union File Systems used by Docker. Do not use this project for other purposes.
 
