@@ -83,20 +83,15 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 	}*/
 
 	// Change the current directory to the temporary directory
-	/*if (chdir(tmp_dir) == -1) {
+	if (chdir(tmp_dir) == -1) {
 		perror("Error changing directory!\n");
 		return EXIT_FAILURE;
-	}*/
+	}
 
 	// Change the current root to the temporary directory using chroot
-	/*char* new_dir = malloc(strlen(tmp_dir) + 2);
+	char* new_dir = malloc(strlen(tmp_dir) + 2);
 	getcwd(new_dir, strlen(tmp_dir) + 2);
 	if (chroot(new_dir) != 0) {
-		perror("Error changing root");
-		return EXIT_FAILURE;
-	}*/
-
-	if (chroot(tmp_dir) != 0) {
 		perror("Error changing root");
 		return EXIT_FAILURE;
 	}
@@ -154,9 +149,9 @@ int main(int argc, char *argv[]) {
 
 
 	// Revise the argv for the child process
-	/*int len = argc - 3 + 2;
+	int len = argc - 3 + 2;
 	char** new_args = calloc(len, sizeof(char*));
-	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));*/
+	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
 	// print new_args
 	/*printf("Command %s\n", command);
@@ -172,7 +167,7 @@ int main(int argc, char *argv[]) {
 	args.err_pipe[0] = err_pipe[0];
 	args.err_pipe[1] = err_pipe[1];
 	args.command = command;
-	args.argv = &argv[3];
+	args.argv = new_args;
 	strcpy(args.docker_image, docker_image);
 
 	// int child_pid = fork();
@@ -198,6 +193,13 @@ int main(int argc, char *argv[]) {
 	// Write the output and error
 	if (out_bytes_read != -1) {
 		out[out_bytes_read] = '\0';
+		/*
+			Note: Remove the "sh" from the output, I don't know why it appears in my output.
+		*/
+		char *pos;
+   		while ((pos = strstr(out, "sh\n")) != NULL) {
+        	memmove(pos, pos + 3, strlen(pos + 3) + 3);
+    	}
 		write(STDOUT_FILENO, out, out_bytes_read);
 	}
 	if (err_bytes_read != -1) {
