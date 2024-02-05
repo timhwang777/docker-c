@@ -33,7 +33,7 @@ int copy_files(char* src, char* dest) {
 	FILE* dest_files = fopen(dest, "wb");
 	
 	// Print the source file names
-	printf("Source file: %s\n", src);
+	//printf("Source file: %s\n", src);
 
 	if (src_files == NULL || dest_files == NULL) {
 		perror("Error opening files!\n");
@@ -116,12 +116,12 @@ int child_function(void* arg) {
 	close(args->out_pipe[0]);
 	close(args->err_pipe[0]);
 
-	printf("Executing %s\n",  (char*)args->command);
+	/*printf("Executing %s\n",  (char*)args->command);
 	int i = 0;
 	while(args->argv[i] != NULL) {
 		printf("Command %s\n", (char*)args->argv[i]);
 		i++;
-	}
+	}*/
 
 	// Set the argv[0] to the tmp_dir, don't need at final stage
 	// args->argv[0] = basename(args->command);
@@ -154,12 +154,12 @@ int main(int argc, char *argv[]) {
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
 
 	// print new_args
-	printf("Command %s\n", command);
+	/*printf("Command %s\n", command);
 	int i = 0;
 	while(new_args[i] != NULL) {
 		printf("Args %s\n", (char*)new_args[i]);
 		i++;
-	}
+	}*/
 
 	struct child_args args;
 	args.out_pipe[0] = out_pipe[0];

@@ -6,7 +6,7 @@
 
 
 int init_docker_image(char* image, char* dir) {
-    printf("Initializing docker image: %s\n", image);
+    //printf("Initializing docker image: %s\n", image);
     
     size_t size = 0;
     char* tag = NULL;
@@ -38,7 +38,7 @@ int init_docker_image(char* image, char* dir) {
         free(scope);
         return -1;
     }
-    printf("Token: %s\n", token);
+    //printf("Token: %s\n", token);
 
     // Pull the image layers
     char** layer_ids = docker_enumerate_layers(token, "library", image, tag);
@@ -52,7 +52,7 @@ int init_docker_image(char* image, char* dir) {
     int result = 0;
     int index = 0;
     while (1) {
-        printf("Downloading layer: %s\n", layer_ids[index]);
+        //printf("Downloading layer: %s\n", layer_ids[index]);
         char* id = layer_ids[index];
         if (id == NULL) {
             break;

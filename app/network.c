@@ -66,7 +66,7 @@ char* get_response(char* uri, char* bearer_token) {
 }
 
 int download_file(char* uri, char* file, char* bearer_token) {
-    printf("Download the docker image\n");
+    //printf("Download the docker image\n");
     int result = -1;
     FILE* file_ptr;
     CURL* curl = curl_easy_init();

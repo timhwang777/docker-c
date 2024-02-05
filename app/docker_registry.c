@@ -12,7 +12,7 @@ char **parse_layers(char *response_content);
 char *parse_token(char *response_content);
 
 char* docker_registry_auth(char* scope) {
-    printf("Docker registry auth for scope: %s\n", scope);
+    // printf("Docker registry auth for scope: %s\n", scope);
     size_t len = strlen(DOCKER_REGISTRY_AUTH_URI) + strlen(scope);
     char* full_uri = malloc(len + 1);
 
@@ -33,7 +33,7 @@ char* docker_registry_auth(char* scope) {
 }
 
 char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) {
-    printf("Enumerating layers for image: %s\n", image);
+    // printf("Enumerating layers for image: %s\n", image);
     char** layer_ids = NULL;
     size_t len = strlen(DOCKER_REGISTRY_IMAGES_URI) + strlen(repo) + strlen(image) + strlen(tag) +
                  strlen("////") + strlen("manifests");
@@ -48,7 +48,7 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
     strcat(full_uri, "manifests");
     strcat(full_uri, "/");
     strcat(full_uri, tag);
-    //printf("Full URI: %s\n", full_uri);
+    // printf("Full URI: %s\n", full_uri);
 
     char* bearer_token = NULL;
     if (token != NULL) {
@@ -57,14 +57,14 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
         strcpy(bearer_token, "Authorization: Bearer ");
         strcat(bearer_token, token);
     }
-    //printf("Bearer token: %s\n", bearer_token);
+    // printf("Bearer token: %s\n", bearer_token);
 
     char* content;
     int idx = 0;
     if ((content = get_response(full_uri, bearer_token)) != NULL) {
-        //printf("Content: %s\n", content);
+        // printf("Content: %s\n", content);
         layer_ids = parse_layers(content);
-        printf("Layer ids: %s\n", layer_ids[idx++]);
+        // printf("Layer ids: %s\n", layer_ids[idx++]);
         free(content);
     }
 
@@ -76,7 +76,7 @@ char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) 
 }
 
 int docker_get_layer(char* token, char* dir, char* repo, char* image, char* id) {
-    printf("Getting layer: %s\n", id);
+    // printf("Getting layer: %s\n", id);
     size_t len = strlen(DOCKER_REGISTRY_IMAGES_URI) + strlen(repo) + strlen(image) + strlen("blobs") + 
                  strlen(id) + strlen("////");
 
