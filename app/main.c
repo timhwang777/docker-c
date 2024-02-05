@@ -83,15 +83,20 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 	}*/
 
 	// Change the current directory to the temporary directory
-	if (chdir(tmp_dir) == -1) {
+	/*if (chdir(tmp_dir) == -1) {
 		perror("Error changing directory!\n");
 		return EXIT_FAILURE;
-	}
+	}*/
 
 	// Change the current root to the temporary directory using chroot
-	char* new_dir = malloc(strlen(tmp_dir) + 2);
+	/*char* new_dir = malloc(strlen(tmp_dir) + 2);
 	getcwd(new_dir, strlen(tmp_dir) + 2);
 	if (chroot(new_dir) != 0) {
+		perror("Error changing root");
+		return EXIT_FAILURE;
+	}*/
+
+	if (chroot(tmp_dir) != 0) {
 		perror("Error changing root");
 		return EXIT_FAILURE;
 	}
@@ -149,9 +154,9 @@ int main(int argc, char *argv[]) {
 
 
 	// Revise the argv for the child process
-	int len = argc - 3 + 2;
+	/*int len = argc - 3 + 2;
 	char** new_args = calloc(len, sizeof(char*));
-	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
+	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));*/
 
 	// print new_args
 	/*printf("Command %s\n", command);
@@ -167,7 +172,7 @@ int main(int argc, char *argv[]) {
 	args.err_pipe[0] = err_pipe[0];
 	args.err_pipe[1] = err_pipe[1];
 	args.command = command;
-	args.argv = new_args;
+	args.argv = &argv[3];
 	strcpy(args.docker_image, docker_image);
 
 	// int child_pid = fork();
