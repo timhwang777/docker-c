@@ -28,6 +28,9 @@ struct child_args {
 int copy_files(char* src, char* dest) {
 	FILE* src_files = fopen(src, "rb");
 	FILE* dest_files = fopen(dest, "wb");
+	
+	// Print the source file names
+	printf("Source file: %s\n", src);
 
 	if (src_files == NULL || dest_files == NULL) {
 		perror("Error opening files!\n");
@@ -70,10 +73,10 @@ int create_and_change_docker_directory(char* curr_dir, char* image) {
 	make_dir(dest_path);
 
 	// Copy the files to the temporary directory
-	if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
+	/*if (copy_files(curr_dir, dest_path) == EXIT_FAILURE) {
 		perror("Error copying files!\n");
 		return EXIT_FAILURE;
-	}
+	}*/
 
 	// Change the current directory to the temporary directory
 	if (chdir(tmp_dir) == -1) {
@@ -144,6 +147,14 @@ int main(int argc, char *argv[]) {
 	int len = argc - 3 + 2;
 	char** new_args = calloc(len, sizeof(char*));
 	memcpy(new_args, &argv[3], (len - 1) * sizeof(char*));
+
+	// print new_args
+	printf("Command %s\n", command);
+	int i = 0;
+	while(new_args[i] != NULL) {
+		printf("Args %s\n", (char*)new_args[i]);
+		i++;
+	}
 
 	struct child_args args;
 	args.out_pipe[0] = out_pipe[0];

@@ -13,6 +13,7 @@ struct response_content {
 };
 
 char* get_response(char* uri, char* bearer_token) {
+    printf("Getting response from: %s with token: %s\n", uri, bearer_token);
     CURL* curl;
     char* content = NULL;
     char full_uri[200];
@@ -35,9 +36,9 @@ char* get_response(char* uri, char* bearer_token) {
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&response);
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
 
-        // Set the bearer token
+        // Set headers
+        struct curl_slist* headers = NULL;
         if (bearer_token != NULL) {
-            struct curl_slist* headers = NULL;
             headers = curl_slist_append(headers, bearer_token);
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         }
@@ -54,9 +55,14 @@ char* get_response(char* uri, char* bearer_token) {
         }
 
         // Clean up
-        curl_easy_cleanup(curl);
         free(response.content);
+        if (headers != NULL) {
+            curl_slist_free_all(headers);
+        }
+        curl_easy_cleanup(curl);
     }
+
+    return content;
 }
 
 int download_file(char* uri, char* file, char* bearer_token) {

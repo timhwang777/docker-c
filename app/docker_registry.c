@@ -12,6 +12,7 @@ char **parse_layers(char *response_content);
 char *parse_token(char *response_content);
 
 char* docker_registry_auth(char* scope) {
+    printf("Docker registry auth for scope: %s\n", scope);
     size_t len = strlen(DOCKER_REGISTRY_AUTH_URI) + strlen(scope);
     char* full_uri = malloc(len + 1);
 
@@ -32,6 +33,7 @@ char* docker_registry_auth(char* scope) {
 }
 
 char** docker_enumerate_layers(char* token, char* repo, char* image, char* tag) {
+    printf("Enumerating layers for image: %s\n", image);
     char** layer_ids = NULL;
     size_t len = strlen(DOCKER_REGISTRY_IMAGES_URI) + strlen(repo) + strlen(image) + strlen(tag) +
                  strlen("////") + strlen("manifests");

@@ -6,6 +6,8 @@
 
 
 int init_docker_image(char* image, char* dir) {
+    printf("Initializing docker image: %s\n", image);
+    
     size_t size = 0;
     char* tag = NULL;
     char* p_start = strstr(image, ":");
@@ -19,7 +21,7 @@ int init_docker_image(char* image, char* dir) {
 
         image = temp; 
     } else {
-        tag = malloc(strlen("latest"));
+        tag = malloc(strlen("latest") + 1);
         strcpy(tag, "latest");
     }
 
