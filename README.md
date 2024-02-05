@@ -1,51 +1,33 @@
-[![progress-banner](https://backend.codecrafters.io/progress/docker/61d9c13e-dd35-4f78-87e6-8e92e46447f9)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Build Docker using C
 
-This is a starting point for C solutions to the
-["Build Your Own Docker" Challenge](https://codecrafters.io/challenges/docker).
+![Static Badge](https://img.shields.io/badge/C-Solutions-Blue?logo=c
+)
 
-In this challenge, you'll build a program that can pull an image from
-[Docker Hub](https://hub.docker.com/) and execute commands in it. Along the way,
-we'll learn about [chroot](https://en.wikipedia.org/wiki/Chroot),
-[kernel namespaces](https://en.wikipedia.org/wiki/Linux_namespaces), the
-[docker registry API](https://docs.docker.com/registry/spec/api/) and much more.
+## Table of Contents
+1. [About the Project](#about-the-project)
+2. [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+3. [Author](#author)
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## About the Project
+This project is about building a simple Docker in C. I have built some underlying Docker tools like getting the token from the Docker Registry, enumerating the Docker file system layers, and authorizing with tokens to download files from the Docker Registry. Moreover, I also developed a `child process` with an independent `PID`, e.g., `PID = 1` with `_GNU_SOURCE` and C's built-in library.\
 
-# Passing the first stage
+Please note that this project is only used for understanding the framework of Docker, Docker Registry, Internet theory, and Union File Systems used by Docker. Do not use this project for other purposes.
 
-The entry point for your Docker implementation is `app/main.c`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
-
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
+## Getting Started
+To run the project, please execute the shell script:
+```shell
+./your_docker.sh
 ```
 
-That's all!
+### Prerequisites
+Make sure you have install all the dependencies and libraries for the project. Inspect the `/src` folder, `your_docker.sh` and source codes for more information.
+Here are some libraries you may use:
+- _GNU_SOURCE
+- Signal
+- Sys/wait, Sys/stat ...
+- Libgen
+- Curl
 
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-You'll use linux-specific syscalls in this challenge. so we'll run your code
-_inside_ a Docker container.
-
-Please ensure you have [Docker installed](https://docs.docker.com/get-docker/)
-locally.
-
-Next, add a [shell alias](https://shapeshed.com/unix-alias/):
-
-```sh
-alias mydocker='docker build -t mydocker . && docker run --cap-add="SYS_ADMIN" mydocker'
-```
-
-(The `--cap-add="SYS_ADMIN"` flag is required to create
-[PID Namespaces](https://man7.org/linux/man-pages/man7/pid_namespaces.7.html))
-
-You can now execute your program like this:
-
-```sh
-mydocker run ubuntu:latest /usr/local/bin/docker-explorer echo hey
-```
+## Author
+Timothy Hwang
